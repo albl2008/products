@@ -6,6 +6,8 @@ import ApiError from '../errors/ApiError';
 import pick from '../utils/pick';
 import { IOptions } from '../paginate/paginate';
 import * as userService from './user.service';
+import axios from 'axios';
+
 
 export const createUser = catchAsync(async (req: Request, res: Response) => {
   const user = await userService.createUser(req.body);
@@ -39,6 +41,21 @@ export const updateUser = catchAsync(async (req: Request, res: Response) => {
 export const deleteUser = catchAsync(async (req: Request, res: Response) => {
   if (typeof req.params['userId'] === 'string') {
     await userService.deleteUserById(new mongoose.Types.ObjectId(req.params['userId']));
+
+    axios({
+      method:'DELETE',
+      url: `http://localhost:3001/v1/users/${req.params['userId']}`,
+      headers: {authorization:req.headers.authorization},
+    }).then(res => {
+      if (res.status === 200) {
+        console.log('Usuario Eliminado')           
+      }
+    })
+    .catch(e => {
+      console.log(e+'Error en eliminacion de usuario')
+    })
+
+
     res.status(httpStatus.NO_CONTENT).send();
   }
 });
