@@ -5,29 +5,12 @@ import { tokenService } from '../token';
 import { userService } from '../user';
 import * as authService from './auth.service';
 import { emailService } from '../email';
-import axios from 'axios'
 
 export const register = catchAsync(async (req: Request, res: Response) => {
   const user = await userService.registerUser(req.body);
   console.log(user._id)
   const tokens = await tokenService.generateAuthTokens(user);
-  axios({
-    method:'POST',
-    url: 'http://localhost:3001/v1/auth/register',
-    data: {
-      _id: user._id,
-      name: user.name,
-      email:user.email,
-      password: user.password
-    },
-  }).then(res => {
-    if (res.status === 200) {
-      console.log('Usuario Replicado')           
-    }
-  })
-  .catch(e => {
-    console.log(e+'Error en replicacion de ususario')
-  })
+  
   res.status(httpStatus.CREATED).send({ user, tokens });
 });
 
@@ -35,21 +18,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await authService.loginUserWithEmailAndPassword(email, password);
   const tokens = await tokenService.generateAuthTokens(user);
-  axios({
-    method:'POST',
-    url: 'http://localhost:3001/v1/auth/login/',
-    data: {
-      email:email,
-      password:password
-    },
-  }).then(res => {
-    if (res.status === 200) {
-      console.log('Usuario Logueado')           
-    }
-  })
-  .catch(e => {
-    console.log(e+'Error en logueo de usuario')
-  })
+  
   res.send({ user, tokens });
 });
 
